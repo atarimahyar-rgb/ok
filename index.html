@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بازی‌های آنلاین</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+body {
+  font-family: sans-serif;
+  direction: rtl;
+  margin: 0;
+  padding: 20px;
+  background: #f5f5f5;
+}
+
+#search {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  text-decoration: none;
+  color: black;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.title {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<input id="search" placeholder="جستجوی بازی...">
+<div id="last"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+let games = [];
+
+fetch('games.json')
+.then(r => r.json())
+.then(list => {
+  games = list;
+  render(list);
+  preloadImages(list);
+  showLastGame();
+});
+
+function render(list) {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  list.forEach(item => {
+    grid.innerHTML += `
+      <a class="card" href="games/${item.folder}/index.html"
+         onclick="localStorage.setItem('lastGame','${item.folder}')">
+        <img loading="lazy" src="games/${item.folder}/${item.image}">
+        <div class="title">${item.name}</div>
+      </a>
+    `;
+  });
+}
+
+function preloadImages(list) {
+  list.forEach(item => {
+    const l = document.createElement('link');
+    l.rel = 'preload';
+    l.as = 'image';
+    l.href = `games/${item.folder}/${item.image}`;
+    document.head.appendChild(l);
+  });
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  render(games.filter(g => g.name.toLowerCase().includes(q)));
+});
+
+function showLastGame() {
+  const last = localStorage.getItem('lastGame');
+  if (!last) return;
+  const div = document.getElementById('last');
+  div.innerHTML = `
+    <a href="games/${last}/index.html">▶ ادامه آخرین بازی</a><br><br>
+  `;
+}
+</script>
+
+</body>
+</html>
