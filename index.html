@@ -1,93 +1,334 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>بازی‌های آنلاین</title>
 
 <link rel="manifest" href="manifest.json">
+<!-- فونت وزیرمتن برای ظاهر زیبای فارسی -->
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
 
 <style>
-body {
-  font-family: sans-serif;
-  direction: rtl;
-  margin: 0;
-  padding: 20px;
-  background: #f5f5f5;
-}
+  :root {
+    --bg-color: #0f172a;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #6366f1; /* نیلی */
+    --accent-hover: #4f46e5;
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    --radius: 16px;
+  }
 
-#search {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-bottom: 20px;
-}
+  * {
+    box-sizing: border-box;
+    outline: none;
+  }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-  gap: 20px;
-}
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  text-decoration: none;
-  color: black;
-  padding: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.1);
-}
+  /* هدر و کانتینر اصلی */
+  header {
+    width: 100%;
+    padding: 40px 20px 20px;
+    text-align: center;
+  }
 
-.card img {
-  width: 100%;
-  border-radius: 10px;
-}
+  h1 {
+    margin: 0 0 20px 0;
+    font-size: 2.5rem;
+    background: linear-gradient(to right, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+  }
 
-.title {
-  text-align: center;
-  margin-top: 8px;
-  font-weight: bold;
-}
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px 40px;
+  }
+
+  /* استایل جستجو */
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #search {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    border: 2px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  #search::placeholder {
+    color: var(--text-muted);
+  }
+
+  #search:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+  }
+
+  /* استایل دکمه ادامه بازی */
+  #last-game-container {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: center;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .resume-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--accent-color), #c084fc);
+    color: white;
+    text-decoration: none;
+    padding: 12px 32px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .resume-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+  }
+
+  .resume-icon {
+    font-size: 1.2rem;
+  }
+
+  /* گرید بازی‌ها */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
+    width: 100%;
+  }
+
+  /* کارت بازی */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-main);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    backdrop-filter: blur(10px);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0; /* برای انیمیشن */
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .card-image-wrapper {
+    width: 100%;
+    padding-top: 75%; /* نسبت تصویر 4:3 */
+    position: relative;
+    background: #000;
+  }
+
+  .card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .card:hover img {
+    transform: scale(1.1);
+  }
+
+  .card-content {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+  }
+
+  .title {
+    font-weight: 700;
+    font-size: 1rem;
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  /* پیام وضعیت (خالی بودن) */
+  .status-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+  }
+
+  /* انیمیشن‌ها */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* مدیا کوئری برای موبایل */
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .grid {
+      grid-template-columns: repeat(2, 1fr); /* دو ستون در موبایل */
+      gap: 16px;
+    }
+    .container { padding: 0 16px 20px; }
+    .resume-btn { font-size: 0.95rem; padding: 10px 20px; }
+  }
 </style>
 </head>
 
 <body>
 
-<input id="search" placeholder="جستجوی بازی...">
-<div id="last"></div>
-<div class="grid" id="grid"></div>
+  <header>
+    <h1>بازی‌های آنلاین</h1>
+  </header>
+
+  <div class="container">
+    <!-- جستجو -->
+    <div class="search-wrapper">
+      <input id="search" placeholder="جستجوی نام بازی..." autocomplete="off">
+    </div>
+
+    <!-- بخش آخرین بازی -->
+    <div id="last-game-container"></div>
+
+    <!-- گرید بازی‌ها -->
+    <div class="grid" id="grid"></div>
+  </div>
 
 <script>
 // Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+  navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
 }
 
 let games = [];
 
+// دریافت لیست بازی‌ها
 fetch('games.json')
-.then(r => r.json())
+.then(r => {
+  if (!r.ok) throw new Error("فایل بازی‌ها یافت نشد");
+  return r.json();
+})
 .then(list => {
   games = list;
   render(list);
   preloadImages(list);
   showLastGame();
+})
+.catch(err => {
+  console.error(err);
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="status-message">خطا در بارگذاری لیست بازی‌ها.</div>';
 });
 
+// تابع رندر کردن کارت‌ها
 function render(list) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  list.forEach(item => {
-    grid.innerHTML += `
-      <a class="card" href="games/${item.folder}/index.html"
-         onclick="localStorage.setItem('lastGame','${item.folder}')">
-        <img loading="lazy" src="games/${item.folder}/${item.image}">
-        <div class="title">${item.name}</div>
-      </a>
-    `;
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="status-message">بازی‌ای با این نام یافت نشد.</div>';
+    return;
+  }
+
+  list.forEach((item, index) => {
+    // استفاده از createElement برای امنیت و پرفورمنس بهتر
+    const link = document.createElement('a');
+    link.className = 'card';
+    link.href = `games/${item.folder}/index.html`;
+    link.onclick = () => localStorage.setItem('lastGame', item.folder);
+    
+    // تاخیر در انیمیشن برای افکت آبشاری
+    link.style.animationDelay = `${index * 0.05}s`;
+
+    const imgWrapper = document.createElement('div');
+    imgWrapper.className = 'card-image-wrapper';
+
+    const img = document.createElement('img');
+    img.loading = "lazy"; // لودینگ تنبل برای تصاویر
+    img.src = `games/${item.folder}/${item.image}`;
+    img.alt = item.name;
+    
+    // مدیریت خطای تصویر (تصویر پیش‌فرض در صورت لود نشدن)
+    img.onerror = function() {
+      this.src = 'https://picsum.photos/seed/game/300/225'; // تصویر Placeholder
+    };
+
+    const content = document.createElement('div');
+    content.className = 'card-content';
+    
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = item.name;
+
+    // مونتاژ اجزا
+    imgWrapper.appendChild(img);
+    content.appendChild(title);
+    link.appendChild(imgWrapper);
+    link.appendChild(content);
+    
+    grid.appendChild(link);
   });
 }
 
+// پیش‌بارگذاری تصاویر
 function preloadImages(list) {
   list.forEach(item => {
     const l = document.createElement('link');
@@ -98,18 +339,33 @@ function preloadImages(list) {
   });
 }
 
+// عملکرد جستجو
 document.getElementById('search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
+  const q = e.target.value.toLowerCase().trim();
   render(games.filter(g => g.name.toLowerCase().includes(q)));
 });
 
+// نمایش دکمه آخرین بازی
 function showLastGame() {
   const last = localStorage.getItem('lastGame');
-  if (!last) return;
-  const div = document.getElementById('last');
-  div.innerHTML = `
-    <a href="games/${last}/index.html">▶ ادامه آخرین بازی</a><br><br>
+  const container = document.getElementById('last-game-container');
+  
+  if (!last) {
+    container.style.display = 'none';
+    return;
+  }
+
+  // یافتن نام بازی برای نمایش بهتر (اختیاری، اگر لیست لود شده باشد)
+  const lastGameObj = games.find(g => g.folder === last);
+  const gameName = lastGameObj ? lastGameObj.name : "بازی";
+
+  container.innerHTML = `
+    <a href="games/${last}/index.html" class="resume-btn">
+      <span class="resume-icon">▶</span>
+      ادامه بازی: ${gameName}
+    </a>
   `;
+  container.style.display = 'flex';
 }
 </script>
 
