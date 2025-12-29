@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>free Online Games</title>
+<title>free Online Games </title>
 
 <link rel="manifest" href="manifest.json">
 <!-- فونت‌های فارسی و انگلیسی -->
@@ -22,12 +22,9 @@
     --accent-hover: #4f46e5;
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
     --radius: 16px;
-    
-    /* فونت پیش‌فرض فارسی */
     --main-font: 'Vazirmatn', sans-serif;
   }
 
-  /* اعمال فونت انگلیسی اگر زبان تغییر کرد */
   html[lang="en"] body {
     --main-font: 'Poppins', sans-serif;
   }
@@ -66,7 +63,6 @@
     font-weight: 800;
   }
 
-  /* تنظیم جهت گرادینت متن برای انگلیسی */
   html[lang="en"] h1 {
     background: linear-gradient(to left, #818cf8, #c084fc);
     -webkit-background-clip: text;
@@ -77,15 +73,17 @@
     width: 100%;
     max-width: 1200px;
     padding: 0 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   /* جستجو */
   .search-wrapper {
     position: relative;
     margin-bottom: 40px;
+    width: 100%;
     max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   #search {
@@ -99,7 +97,7 @@
     font-family: var(--main-font);
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    text-align: inherit; /* راست‌چین برای فارسی، چپ‌چین برای انگلیسی */
+    text-align: inherit;
   }
 
   #search::placeholder {
@@ -118,6 +116,7 @@
     display: flex;
     justify-content: center;
     animation: fadeIn 0.5s ease-out;
+    width: 100%;
   }
 
   .resume-btn {
@@ -147,6 +146,7 @@
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 24px;
     width: 100%;
+    margin-bottom: 20px;
   }
 
   .card {
@@ -213,6 +213,55 @@
     width: 100%;
   }
 
+  /* استایل پیجینیشن (صفحه‌بندی) */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    padding: 20px;
+    width: 100%;
+  }
+
+  .page-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: var(--main-font);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(5px);
+  }
+
+  .page-btn:hover:not(:disabled) {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+  }
+
+  .page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none !important;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .page-info {
+    color: var(--text-muted);
+    font-size: 1rem;
+    min-width: 80px;
+    text-align: center;
+  }
+
   .status-message {
     grid-column: 1 / -1;
     text-align: center;
@@ -221,7 +270,6 @@
     font-size: 1.2rem;
   }
 
-  /* انیمیشن‌ها */
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -240,6 +288,8 @@
     }
     .container { padding: 0 16px 20px; }
     .resume-btn { font-size: 0.95rem; padding: 10px 20px; }
+    .pagination { gap: 10px; }
+    .page-btn { padding: 10px 16px; font-size: 0.9rem; }
   }
 </style>
 </head>
@@ -247,20 +297,20 @@
 <body>
 
   <header>
-    <h1 data-i18n="title">بازی‌های آنلاین رایگان</h1>
+    <h1 data-i18n="title">بازی‌های آنلاین و کاملا رایگان</h1>
   </header>
 
   <div class="container">
-    <!-- جستجو -->
     <div class="search-wrapper">
       <input id="search" data-i18n-placeholder="searchPlaceholder" placeholder="جستجوی نام بازی..." autocomplete="off">
     </div>
 
-    <!-- بخش آخرین بازی -->
     <div id="last-game-container"></div>
 
-    <!-- گرید بازی‌ها -->
     <div class="grid" id="grid"></div>
+
+    <!-- بخش پیجینیشن -->
+    <div class="pagination" id="pagination"></div>
   </div>
 
 <script>
@@ -269,38 +319,43 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
 }
 
-// تنظیمات زبان و ترجمه
-let currentLang = 'fa';
+// متغیرهای جهانی
 let games = [];
+let filteredGames = []; // لیست فعلی برای نمایش (ممکن است فیلتر شده باشد)
+let currentPage = 1;
+const itemsPerPage = 15; // تعداد کارت در هر صفحه
+let currentLang = 'fa';
 
 const translations = {
   fa: {
-    title: "بازی‌های آنلاین رایگان",
+    title: "بازی‌های آنلاین و کاملا رایگان",
     searchPlaceholder: "جستجوی نام بازی...",
     resume: "ادامه بازی: ",
     noGames: "بازی‌ای با این نام یافت نشد.",
-    errorLoad: "خطا در بارگذاری لیست بازی‌ها."
+    errorLoad: "خطا در بارگذاری لیست بازی‌ها.",
+    prevPage: "قبلی",
+    nextPage: "بعدی",
+    pageOf: "از"
   },
   en: {
     title: "free Online Games",
     searchPlaceholder: "Search games...",
     resume: "Resume: ",
     noGames: "No games found.",
-    errorLoad: "Error loading games list."
+    errorLoad: "Error loading games list.",
+    prevPage: "Prev",
+    nextPage: "Next",
+    pageOf: "of"
   }
 };
 
-// تابع تغییر زبان کل صفحه
 function setLanguage(lang) {
   currentLang = lang;
   const html = document.documentElement;
-  const body = document.body;
-
-  // تغییر ویژگی‌های HTML
+  
   html.lang = lang;
   html.dir = lang === 'fa' ? 'rtl' : 'ltr';
 
-  // بروزرسانی متون بر اساس data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[lang][key]) {
@@ -308,7 +363,6 @@ function setLanguage(lang) {
     }
   });
 
-  // بروزرسانی placeholderها
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[lang][key]) {
@@ -316,21 +370,16 @@ function setLanguage(lang) {
     }
   });
 
-  // رندر مجدد برای اعمال زبان به دکمه ادامه بازی و پیام‌ها
-  if (games.length > 0) {
-    render(games); // رندر لیست (برای پیام خالی بودن)
-    showLastGame(); // رندر دکمه ادامه بازی
-  }
+  // به‌روزرسانی دکمه‌های پیجینیشن و دکمه ادامه بازی
+  updatePagination();
+  showLastGame();
 }
 
-// تشخیص IP و تغییر زبان
 async function detectLanguage() {
   try {
     const response = await fetch('https://ipapi.co/json/');
     if (!response.ok) throw new Error('Network response was not ok');
     const data = await response.json();
-    
-    // اگر کشور ایران نباشد، زبان را انگلیسی کن
     if (data.country !== 'IR') {
       setLanguage('en');
     }
@@ -339,7 +388,6 @@ async function detectLanguage() {
   }
 }
 
-// دریافت لیست بازی‌ها
 fetch('games.json')
 .then(r => {
   if (!r.ok) throw new Error("File not found");
@@ -347,10 +395,10 @@ fetch('games.json')
 })
 .then(list => {
   games = list;
-  render(list);
+  filteredGames = list; // ابتدا همه بازی‌ها نمایش داده می‌شوند
+  renderList();
   preloadImages(list);
   showLastGame();
-  // بعد از لود شدن داده‌ها، زبان را چک کن
   detectLanguage();
 })
 .catch(err => {
@@ -359,16 +407,22 @@ fetch('games.json')
   grid.innerHTML = `<div class="status-message">${translations[currentLang].errorLoad}</div>`;
 });
 
-function render(list) {
+function renderList() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
-  if (list.length === 0) {
+  // محاسبه اندیس‌ها برای صفحه‌بندی
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const pageData = filteredGames.slice(startIndex, endIndex);
+
+  if (filteredGames.length === 0) {
     grid.innerHTML = `<div class="status-message">${translations[currentLang].noGames}</div>`;
+    document.getElementById('pagination').style.display = 'none';
     return;
   }
 
-  list.forEach((item, index) => {
+  pageData.forEach((item, index) => {
     const link = document.createElement('a');
     link.className = 'card';
     link.href = `games/${item.folder}/index.html`;
@@ -381,7 +435,7 @@ function render(list) {
     const img = document.createElement('img');
     img.loading = "lazy";
     img.src = `games/${item.folder}/${item.image}`;
-    img.alt = item.name; // استفاده از نام اصلی برای آلت
+    img.alt = item.name;
     
     img.onerror = function() {
       this.src = 'https://picsum.photos/seed/game/300/225';
@@ -393,9 +447,6 @@ function render(list) {
     const title = document.createElement('div');
     title.className = 'title';
     
-    // هوشمند: اول چک می‌کند آیا نام انگلیسی جداگانه داریم؟
-    // اگر فایل json شما فیلد name_en دارد، از آن استفاده می‌کند
-    // در غیر این صورت از name اصلی استفاده می‌کند
     if (currentLang === 'en' && item.name_en) {
       title.textContent = item.name_en;
     } else {
@@ -408,7 +459,65 @@ function render(list) {
     link.appendChild(content);
     grid.appendChild(link);
   });
+
+  updatePagination();
 }
+
+function updatePagination() {
+  const pagination = document.getElementById('pagination');
+  const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
+
+  // اگر فقط یک صفحه باشد، پیجینیشن را مخفی کن
+  if (totalPages <= 1) {
+    pagination.style.display = 'none';
+    return;
+  } else {
+    pagination.style.display = 'flex';
+  }
+
+  const prevBtnText = `<span style="font-size:1.2em; display:inline-block; transform: rotate(180deg);">&#9654;</span> ${translations[currentLang].prevPage}`;
+  const nextBtnText = `${translations[currentLang].nextPage} <span style="font-size:1.2em; display:inline-block;">&#9654;</span>`;
+  const pageText = `${currentPage} ${translations[currentLang].pageOf} ${totalPages}`;
+
+  pagination.innerHTML = `
+    <button class="page-btn" id="prevBtn" ${currentPage === 1 ? 'disabled' : ''}>
+       ${prevBtnText}
+    </button>
+    <div class="page-info">${pageText}</div>
+    <button class="page-btn" id="nextBtn" ${currentPage === totalPages ? 'disabled' : ''}>
+       ${nextBtnText}
+    </button>
+  `;
+
+  // رویداد کلیک دکمه‌ها
+  document.getElementById('prevBtn').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      renderList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderList();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase().trim();
+  
+  filteredGames = games.filter(g => 
+    g.name.toLowerCase().includes(q) || 
+    (g.name_en && g.name_en.toLowerCase().includes(q))
+  );
+  
+  currentPage = 1; // ریست کردن صفحه به اولین نتیجه
+  renderList();
+});
 
 function preloadImages(list) {
   list.forEach(item => {
@@ -420,18 +529,6 @@ function preloadImages(list) {
   });
 }
 
-document.getElementById('search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase().trim();
-  
-  // فیلتر کردن بر اساس نام فارسی و (اگر وجود داشته باشد) نام انگلیسی
-  const filtered = games.filter(g => 
-    g.name.toLowerCase().includes(q) || 
-    (g.name_en && g.name_en.toLowerCase().includes(q))
-  );
-  
-  render(filtered);
-});
-
 function showLastGame() {
   const last = localStorage.getItem('lastGame');
   const container = document.getElementById('last-game-container');
@@ -442,7 +539,6 @@ function showLastGame() {
   }
 
   const lastGameObj = games.find(g => g.folder === last);
-  // انتخاب نام مناسب بر اساس زبان فعلی
   let gameName = "";
   if (lastGameObj) {
     if (currentLang === 'en' && lastGameObj.name_en) {
