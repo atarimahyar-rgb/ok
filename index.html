@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>free Online Games </title>
+<title>Free Online Games بازی های رایگان آنلاین</title>
 
 <link rel="manifest" href="manifest.json">
-<!-- فونت‌های فارسی و انگلیسی -->
+<!-- فونت‌ها -->
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -78,7 +78,6 @@
     align-items: center;
   }
 
-  /* جستجو */
   .search-wrapper {
     position: relative;
     margin-bottom: 40px;
@@ -110,7 +109,6 @@
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
   }
 
-  /* دکمه ادامه بازی */
   #last-game-container {
     margin-bottom: 40px;
     display: flex;
@@ -140,7 +138,6 @@
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
   }
 
-  /* گرید */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -213,7 +210,6 @@
     width: 100%;
   }
 
-  /* استایل پیجینیشن (صفحه‌بندی) */
   .pagination {
     display: flex;
     justify-content: center;
@@ -297,7 +293,7 @@
 <body>
 
   <header>
-    <h1 data-i18n="title">بازی‌های آنلاین و کاملا رایگان</h1>
+    <h1 data-i18n="title">بازی‌های آنلاین رایگان</h1>
   </header>
 
   <div class="container">
@@ -321,14 +317,14 @@ if ('serviceWorker' in navigator) {
 
 // متغیرهای جهانی
 let games = [];
-let filteredGames = []; // لیست فعلی برای نمایش (ممکن است فیلتر شده باشد)
+let filteredGames = []; // لیست فعلی برای نمایش
 let currentPage = 1;
-const itemsPerPage = 15; // تعداد کارت در هر صفحه
+const itemsPerPage = 15; 
 let currentLang = 'fa';
 
 const translations = {
   fa: {
-    title: "بازی‌های آنلاین و کاملا رایگان",
+    title: "بازی‌های آنلاین رایگان",
     searchPlaceholder: "جستجوی نام بازی...",
     resume: "ادامه بازی: ",
     noGames: "بازی‌ای با این نام یافت نشد.",
@@ -338,7 +334,7 @@ const translations = {
     pageOf: "از"
   },
   en: {
-    title: "free Online Games",
+    title: "Free Online Games",
     searchPlaceholder: "Search games...",
     resume: "Resume: ",
     noGames: "No games found.",
@@ -370,7 +366,6 @@ function setLanguage(lang) {
     }
   });
 
-  // به‌روزرسانی دکمه‌های پیجینیشن و دکمه ادامه بازی
   updatePagination();
   showLastGame();
 }
@@ -395,9 +390,14 @@ fetch('games.json')
 })
 .then(list => {
   games = list;
-  filteredGames = list; // ابتدا همه بازی‌ها نمایش داده می‌شوند
+  filteredGames = list;
+  
+  // فقط صفحه اول را رندر کن (تصاویر بقیه صفحات لود نمی‌شوند)
   renderList();
-  preloadImages(list);
+  
+  // حذف شد: preloadImages(list); 
+  // ما دیگر هیچ تصویری را از قبل دانلود نمی‌کنیم تا سرعت بالا برود.
+  
   showLastGame();
   detectLanguage();
 })
@@ -409,11 +409,14 @@ fetch('games.json')
 
 function renderList() {
   const grid = document.getElementById('grid');
+  
+  // پاک کردن کل گرید: تصاویر صفحه قبلی از حافظه و DOM مرورگر پاک می‌شوند
   grid.innerHTML = '';
 
-  // محاسبه اندیس‌ها برای صفحه‌بندی
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
+  
+  // فقط برش داده شده برای این صفحه را انتخاب کن
   const pageData = filteredGames.slice(startIndex, endIndex);
 
   if (filteredGames.length === 0) {
@@ -433,10 +436,12 @@ function renderList() {
     imgWrapper.className = 'card-image-wrapper';
 
     const img = document.createElement('img');
-    img.loading = "lazy";
+    // نکته: چون فقط همین ۱۵ تا در DOM هستند، مرورگر فقط همین‌ها را دانلود می‌کند
+    // نیازی به loading="lazy" سخت‌گیرانه نیست، چون اسکرول نداریم که تصاویر پایین‌تر باشند
     img.src = `games/${item.folder}/${item.image}`;
     img.alt = item.name;
     
+    // تصویر جایگزین در صورت خطا
     img.onerror = function() {
       this.src = 'https://picsum.photos/seed/game/300/225';
     };
@@ -467,7 +472,6 @@ function updatePagination() {
   const pagination = document.getElementById('pagination');
   const totalPages = Math.ceil(filteredGames.length / itemsPerPage);
 
-  // اگر فقط یک صفحه باشد، پیجینیشن را مخفی کن
   if (totalPages <= 1) {
     pagination.style.display = 'none';
     return;
@@ -489,11 +493,10 @@ function updatePagination() {
     </button>
   `;
 
-  // رویداد کلیک دکمه‌ها
   document.getElementById('prevBtn').addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
-      renderList();
+      renderList(); // رندر مجدد باعث لود شدن تصاویر صفحه جدید می‌شود
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
@@ -501,7 +504,7 @@ function updatePagination() {
   document.getElementById('nextBtn').addEventListener('click', () => {
     if (currentPage < totalPages) {
       currentPage++;
-      renderList();
+      renderList(); // رندر مجدد باعث لود شدن تصاویر صفحه جدید می‌شود
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   });
@@ -515,19 +518,11 @@ document.getElementById('search').addEventListener('input', e => {
     (g.name_en && g.name_en.toLowerCase().includes(q))
   );
   
-  currentPage = 1; // ریست کردن صفحه به اولین نتیجه
+  currentPage = 1;
   renderList();
 });
 
-function preloadImages(list) {
-  list.forEach(item => {
-    const l = document.createElement('link');
-    l.rel = 'preload';
-    l.as = 'image';
-    l.href = `games/${item.folder}/${item.image}`;
-    document.head.appendChild(l);
-  });
-}
+// تابع preloadImages کاملا حذف شد چون با نیاز شما که تصاویر زود لود نشوند مغایرت داشت
 
 function showLastGame() {
   const last = localStorage.getItem('lastGame');
@@ -550,6 +545,7 @@ function showLastGame() {
     gameName = currentLang === 'en' ? "Game" : "بازی";
   }
 
+  // دکمه ادامه بازی بدون تصویر سبک‌تر است
   container.innerHTML = `
     <a href="games/${last}/index.html" class="resume-btn">
       <span class="resume-icon">▶</span>
