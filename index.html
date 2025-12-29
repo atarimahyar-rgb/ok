@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>بازی‌های آنلاین</title>
+<title>free Online Games</title>
 
 <link rel="manifest" href="manifest.json">
-<!-- فونت وزیرمتن برای ظاهر زیبای فارسی -->
+<!-- فونت‌های فارسی و انگلیسی -->
 <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -17,10 +18,18 @@
     --card-border: rgba(255, 255, 255, 0.1);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --accent-color: #6366f1; /* نیلی */
+    --accent-color: #6366f1; 
     --accent-hover: #4f46e5;
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
     --radius: 16px;
+    
+    /* فونت پیش‌فرض فارسی */
+    --main-font: 'Vazirmatn', sans-serif;
+  }
+
+  /* اعمال فونت انگلیسی اگر زبان تغییر کرد */
+  html[lang="en"] body {
+    --main-font: 'Poppins', sans-serif;
   }
 
   * {
@@ -29,7 +38,7 @@
   }
 
   body {
-    font-family: 'Vazirmatn', sans-serif;
+    font-family: var(--main-font);
     margin: 0;
     padding: 0;
     background: var(--bg-color);
@@ -39,9 +48,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: font-family 0.3s ease;
   }
 
-  /* هدر و کانتینر اصلی */
   header {
     width: 100%;
     padding: 40px 20px 20px;
@@ -57,13 +66,20 @@
     font-weight: 800;
   }
 
+  /* تنظیم جهت گرادینت متن برای انگلیسی */
+  html[lang="en"] h1 {
+    background: linear-gradient(to left, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
   .container {
     width: 100%;
     max-width: 1200px;
     padding: 0 20px 40px;
   }
 
-  /* استایل جستجو */
+  /* جستجو */
   .search-wrapper {
     position: relative;
     margin-bottom: 40px;
@@ -80,9 +96,10 @@
     border: 2px solid var(--card-border);
     background: rgba(255, 255, 255, 0.05);
     color: white;
-    font-family: 'Vazirmatn', sans-serif;
+    font-family: var(--main-font);
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: inherit; /* راست‌چین برای فارسی، چپ‌چین برای انگلیسی */
   }
 
   #search::placeholder {
@@ -95,7 +112,7 @@
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
   }
 
-  /* استایل دکمه ادامه بازی */
+  /* دکمه ادامه بازی */
   #last-game-container {
     margin-bottom: 40px;
     display: flex;
@@ -116,6 +133,7 @@
     font-size: 1.1rem;
     box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     transition: transform 0.2s, box-shadow 0.2s;
+    font-family: var(--main-font);
   }
 
   .resume-btn:hover {
@@ -123,11 +141,7 @@
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
   }
 
-  .resume-icon {
-    font-size: 1.2rem;
-  }
-
-  /* گرید بازی‌ها */
+  /* گرید */
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -135,7 +149,6 @@
     width: 100%;
   }
 
-  /* کارت بازی */
   .card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -149,7 +162,7 @@
     position: relative;
     backdrop-filter: blur(10px);
     animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    opacity: 0; /* برای انیمیشن */
+    opacity: 0;
   }
 
   .card:hover {
@@ -160,7 +173,7 @@
 
   .card-image-wrapper {
     width: 100%;
-    padding-top: 75%; /* نسبت تصویر 4:3 */
+    padding-top: 75%;
     position: relative;
     background: #000;
   }
@@ -200,7 +213,6 @@
     width: 100%;
   }
 
-  /* پیام وضعیت (خالی بودن) */
   .status-message {
     grid-column: 1 / -1;
     text-align: center;
@@ -220,11 +232,10 @@
     to { opacity: 1; transform: scale(1); }
   }
 
-  /* مدیا کوئری برای موبایل */
   @media (max-width: 600px) {
     h1 { font-size: 2rem; }
     .grid {
-      grid-template-columns: repeat(2, 1fr); /* دو ستون در موبایل */
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
     }
     .container { padding: 0 16px 20px; }
@@ -236,13 +247,13 @@
 <body>
 
   <header>
-    <h1>بازی‌های آنلاین</h1>
+    <h1 data-i18n="title">بازی‌های آنلاین رایگان</h1>
   </header>
 
   <div class="container">
     <!-- جستجو -->
     <div class="search-wrapper">
-      <input id="search" placeholder="جستجوی نام بازی..." autocomplete="off">
+      <input id="search" data-i18n-placeholder="searchPlaceholder" placeholder="جستجوی نام بازی..." autocomplete="off">
     </div>
 
     <!-- بخش آخرین بازی -->
@@ -258,12 +269,80 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(err => console.log(err));
 }
 
+// تنظیمات زبان و ترجمه
+let currentLang = 'fa';
 let games = [];
+
+const translations = {
+  fa: {
+    title: "بازی‌های آنلاین رایگان",
+    searchPlaceholder: "جستجوی نام بازی...",
+    resume: "ادامه بازی: ",
+    noGames: "بازی‌ای با این نام یافت نشد.",
+    errorLoad: "خطا در بارگذاری لیست بازی‌ها."
+  },
+  en: {
+    title: "free Online Games",
+    searchPlaceholder: "Search games...",
+    resume: "Resume: ",
+    noGames: "No games found.",
+    errorLoad: "Error loading games list."
+  }
+};
+
+// تابع تغییر زبان کل صفحه
+function setLanguage(lang) {
+  currentLang = lang;
+  const html = document.documentElement;
+  const body = document.body;
+
+  // تغییر ویژگی‌های HTML
+  html.lang = lang;
+  html.dir = lang === 'fa' ? 'rtl' : 'ltr';
+
+  // بروزرسانی متون بر اساس data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) {
+      el.textContent = translations[lang][key];
+    }
+  });
+
+  // بروزرسانی placeholderها
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (translations[lang][key]) {
+      el.placeholder = translations[lang][key];
+    }
+  });
+
+  // رندر مجدد برای اعمال زبان به دکمه ادامه بازی و پیام‌ها
+  if (games.length > 0) {
+    render(games); // رندر لیست (برای پیام خالی بودن)
+    showLastGame(); // رندر دکمه ادامه بازی
+  }
+}
+
+// تشخیص IP و تغییر زبان
+async function detectLanguage() {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    
+    // اگر کشور ایران نباشد، زبان را انگلیسی کن
+    if (data.country !== 'IR') {
+      setLanguage('en');
+    }
+  } catch (error) {
+    console.log("Could not detect IP language, staying default (fa).");
+  }
+}
 
 // دریافت لیست بازی‌ها
 fetch('games.json')
 .then(r => {
-  if (!r.ok) throw new Error("فایل بازی‌ها یافت نشد");
+  if (!r.ok) throw new Error("File not found");
   return r.json();
 })
 .then(list => {
@@ -271,44 +350,41 @@ fetch('games.json')
   render(list);
   preloadImages(list);
   showLastGame();
+  // بعد از لود شدن داده‌ها، زبان را چک کن
+  detectLanguage();
 })
 .catch(err => {
   console.error(err);
   const grid = document.getElementById('grid');
-  grid.innerHTML = '<div class="status-message">خطا در بارگذاری لیست بازی‌ها.</div>';
+  grid.innerHTML = `<div class="status-message">${translations[currentLang].errorLoad}</div>`;
 });
 
-// تابع رندر کردن کارت‌ها
 function render(list) {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
   if (list.length === 0) {
-    grid.innerHTML = '<div class="status-message">بازی‌ای با این نام یافت نشد.</div>';
+    grid.innerHTML = `<div class="status-message">${translations[currentLang].noGames}</div>`;
     return;
   }
 
   list.forEach((item, index) => {
-    // استفاده از createElement برای امنیت و پرفورمنس بهتر
     const link = document.createElement('a');
     link.className = 'card';
     link.href = `games/${item.folder}/index.html`;
     link.onclick = () => localStorage.setItem('lastGame', item.folder);
-    
-    // تاخیر در انیمیشن برای افکت آبشاری
     link.style.animationDelay = `${index * 0.05}s`;
 
     const imgWrapper = document.createElement('div');
     imgWrapper.className = 'card-image-wrapper';
 
     const img = document.createElement('img');
-    img.loading = "lazy"; // لودینگ تنبل برای تصاویر
+    img.loading = "lazy";
     img.src = `games/${item.folder}/${item.image}`;
-    img.alt = item.name;
+    img.alt = item.name; // استفاده از نام اصلی برای آلت
     
-    // مدیریت خطای تصویر (تصویر پیش‌فرض در صورت لود نشدن)
     img.onerror = function() {
-      this.src = 'https://picsum.photos/seed/game/300/225'; // تصویر Placeholder
+      this.src = 'https://picsum.photos/seed/game/300/225';
     };
 
     const content = document.createElement('div');
@@ -316,19 +392,24 @@ function render(list) {
     
     const title = document.createElement('div');
     title.className = 'title';
-    title.textContent = item.name;
+    
+    // هوشمند: اول چک می‌کند آیا نام انگلیسی جداگانه داریم؟
+    // اگر فایل json شما فیلد name_en دارد، از آن استفاده می‌کند
+    // در غیر این صورت از name اصلی استفاده می‌کند
+    if (currentLang === 'en' && item.name_en) {
+      title.textContent = item.name_en;
+    } else {
+      title.textContent = item.name;
+    }
 
-    // مونتاژ اجزا
     imgWrapper.appendChild(img);
     content.appendChild(title);
     link.appendChild(imgWrapper);
     link.appendChild(content);
-    
     grid.appendChild(link);
   });
 }
 
-// پیش‌بارگذاری تصاویر
 function preloadImages(list) {
   list.forEach(item => {
     const l = document.createElement('link');
@@ -339,13 +420,18 @@ function preloadImages(list) {
   });
 }
 
-// عملکرد جستجو
 document.getElementById('search').addEventListener('input', e => {
   const q = e.target.value.toLowerCase().trim();
-  render(games.filter(g => g.name.toLowerCase().includes(q)));
+  
+  // فیلتر کردن بر اساس نام فارسی و (اگر وجود داشته باشد) نام انگلیسی
+  const filtered = games.filter(g => 
+    g.name.toLowerCase().includes(q) || 
+    (g.name_en && g.name_en.toLowerCase().includes(q))
+  );
+  
+  render(filtered);
 });
 
-// نمایش دکمه آخرین بازی
 function showLastGame() {
   const last = localStorage.getItem('lastGame');
   const container = document.getElementById('last-game-container');
@@ -355,14 +441,23 @@ function showLastGame() {
     return;
   }
 
-  // یافتن نام بازی برای نمایش بهتر (اختیاری، اگر لیست لود شده باشد)
   const lastGameObj = games.find(g => g.folder === last);
-  const gameName = lastGameObj ? lastGameObj.name : "بازی";
+  // انتخاب نام مناسب بر اساس زبان فعلی
+  let gameName = "";
+  if (lastGameObj) {
+    if (currentLang === 'en' && lastGameObj.name_en) {
+      gameName = lastGameObj.name_en;
+    } else {
+      gameName = lastGameObj.name;
+    }
+  } else {
+    gameName = currentLang === 'en' ? "Game" : "بازی";
+  }
 
   container.innerHTML = `
     <a href="games/${last}/index.html" class="resume-btn">
       <span class="resume-icon">▶</span>
-      ادامه بازی: ${gameName}
+      ${translations[currentLang].resume} ${gameName}
     </a>
   `;
   container.style.display = 'flex';
